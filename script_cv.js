@@ -7,7 +7,7 @@ const authorizeApplication = () => {
 
 // TODO #3.1: Change group number
 const getGroupNumber = () => {
-  return 99;
+  return 25;
 };
 
 // Example: Send Get user profile ("GET") request to backend server and show the response on the webpage
@@ -36,22 +36,42 @@ const getUserProfile = async () => {
 // TODO #3.3: Send Get Courses ("GET") request to backend server and filter the response to get Comp Eng Ess CV_cid
 //            and display the result on the webpage
 const getCompEngEssCid = async () => {
-  document.getElementById("ces-cid-value").innerHTML = "";
-  console.log(
-    "This function should fetch 'get courses' route from backend server and find cv_cid value of Comp Eng Ess."
-  );
+  await fetch(`http://${backendIPAddress}/courseville/get_courses`, {
+    method: "GET",
+    credentials: "include",
+  })
+    .then((response) => response.json())
+    .then(
+      ({ data }) =>
+        (document.getElementById("ces-cid-value").innerHTML = data.student.find(
+          (course) => course.course_no === "2110221"
+        ).cv_cid)
+    );
 };
-
 // TODO #3.5: Send Get Course Assignments ("GET") request with cv_cid to backend server
 //            and create Comp Eng Ess assignments table based on the response (itemid, title)
 const createCompEngEssAssignmentTable = async () => {
   const table_body = document.getElementById("main-table-body");
   table_body.innerHTML = "";
   const cv_cid = document.getElementById("ces-cid-value").innerHTML;
-
-  console.log(
-    "This function should fetch 'get course assignments' route from backend server and show assignments in the table."
-  );
+  await fetch(
+    `http://${backendIPAddress}/courseville/get_course_assignments/${cv_cid}`,
+    {
+      method: "GET",
+      credentials: "include",
+    }
+  )
+    .then((response) => response.json())
+    .then(({ data }) => {
+      data.map((assignment) => {
+        table_body.innerHTML += `
+          <tr>
+            <td>${assignment.itemid}</td>
+            <td>${assignment.title}</td>
+          </tr>
+        `;
+      });
+    });
 };
 
 const logout = async () => {
